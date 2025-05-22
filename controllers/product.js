@@ -1,29 +1,26 @@
 const Product = require('../models/product');
-const User = require('../models/user');
 
+// Admin-only: Create a new product
 exports.createProduct = async (req, res) => {
   try {
-    const { userId, name, description, price, stock } = req.body;
+    // TEMPORARY ADMIN CHECK: Replace this with real auth later
+    const isAdmin = req.body.isAdmin;
 
-    if (!userId) {
-      return res.status(401).json({ message: 'User ID is required' });
+    if (!isAdmin) {
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
     }
 
-    // Find user and check admin status
-    const user = await User.findById(userId);
-    if (!user || !user.isAdmin) {
-      return res.status(403).json({ message: 'Only admins can create products' });
-    }
+    const { name, description, price } = req.body;
 
-    if (!name || !price) {
-      return res.status(400).json({ message: 'Name and price are required' });
-    }
+    const newProduct = new Product({
+      name,
+      description,
+      price
+    });
 
-    const newProduct = new Product({ name, description, price, stock });
-    await newProduct.save();
-
-    res.status(201).json({ message: 'Product created successfully', product: newProduct });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const savedProduct = await newProduct.save();
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
   }
 };

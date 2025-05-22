@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { createProduct } = require('../controllers/product');
+const productController = require('../controllers/product');
 
-router.post('/', createProduct);
+// POST /products — Create product (admin only, temporary check)
+router.post('/', productController.createProduct);
 
 module.exports = router;
