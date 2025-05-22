@@ -7,7 +7,7 @@ const cors = require('cors');
 // [SECTION] App Initialization
 const app = express();
 app.use(express.json());
-app.use(cors()); // Enable CORS
+app.use(cors());
 
 // [SECTION] Database Connection
 mongoose.connect(process.env.MONGO_URI)
