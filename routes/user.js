@@ -20,3 +20,4 @@ router.patch('/:id/set-as-admin', authenticate, setAdmin);
 router.patch('/update-password', authenticate, updatePassword);
 
 module.exports = router;
+
