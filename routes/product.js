@@ -9,7 +9,7 @@ const {
   updateProduct,
   archiveProduct,
   activateProduct
-} = require('../controllers/Product');
+} = require('../controllers/product');
 
 const authenticate = require('../middleware/authenticate');
 
