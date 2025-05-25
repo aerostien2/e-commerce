@@ -1,5 +1,5 @@
 const Cart = require('../models/cart');
-const Product = require('../models/product');
+const Product = require('../models/Product');
 
 // Helper function to calculate subtotal
 const calculateSubtotal = (price, quantity) => price * quantity;
