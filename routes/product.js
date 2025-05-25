@@ -1,6 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const productController = require('../controllers/product');
+
+const {
+  createProduct,
+  getAllProducts,
+  getActiveProducts,
+  getProductById,
+  updateProduct,
+  archiveProduct,
+  activateProduct
+} = require('../controllers/product');
 
 const authenticate = require('../middleware/authenticate');
 
