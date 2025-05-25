@@ -38,7 +38,7 @@ exports.getActiveProducts = async (req, res) => {
 // Retrieve a single product by ID (Public)
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.productId);
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (err) {
@@ -51,7 +51,7 @@ exports.updateProduct = async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
 
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updated = await Product.findByIdAndUpdate(req.params.productId, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: 'Product not found' });
     res.json(updated);
   } catch (err) {
@@ -64,7 +64,7 @@ exports.archiveProduct = async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
 
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    const product = await Product.findByIdAndUpdate(req.params.productId, { isActive: false }, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json({ message: 'Product archived successfully', product });
   } catch (err) {
@@ -77,7 +77,7 @@ exports.activateProduct = async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
 
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
+    const product = await Product.findByIdAndUpdate(req.params.productId, { isActive: true }, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json({ message: 'Product activated successfully', product });
   } catch (err) {
