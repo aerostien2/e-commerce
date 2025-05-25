@@ -48,16 +48,15 @@ exports.loginUser = async (req, res) => {
 // Set user as admin (Admin only)
 exports.setAdmin = async (req, res) => {
   try {
-    const { adminId } = req.body; // ID of the admin making the request
-    const { id } = req.params;     // ID of user to update
+    const adminId = req.user.userId;  // requester
+    const isAdmin = req.user.isAdmin; // check if requester is admin
 
-    // Check if requester is admin
-    const adminUser = await User.findById(adminId);
-    if (!adminUser || !adminUser.isAdmin) {
+    if (!isAdmin) {
       return res.status(403).json({ message: 'Only admins can set admin rights' });
     }
 
-    // Update target user
+    const { id } = req.params; // user to be set as admin
+
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -70,12 +69,12 @@ exports.setAdmin = async (req, res) => {
   }
 };
 
+
 // Retrieve user details
 exports.getUserDetails = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const user = await User.findById(id).select('-password'); // exclude password
+    // Use authenticated user's id instead of param
+    const user = await User.findById(req.user.userId).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     res.json(user);
@@ -87,23 +86,21 @@ exports.getUserDetails = async (req, res) => {
 // Update password
 exports.updatePassword = async (req, res) => {
   try {
-    const { id } = req.params;
+    // Use authenticated user's id instead of param
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
       return res.status(400).json({ message: 'Old and new passwords are required' });
     }
 
-    const user = await User.findById(id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    // Verify old password
     const validOldPassword = await bcrypt.compare(oldPassword, user.password);
     if (!validOldPassword) {
       return res.status(401).json({ message: 'Old password is incorrect' });
     }
 
-    // Hash new password and save
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
