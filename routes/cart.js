@@ -13,7 +13,7 @@ const {
 } = require('../controllers/cart');
 
 // Middleware to check if user is authenticated - you need to implement this
-const authenticate = require('../middleware/authenticate');
+const authenticate = require('../authenticate');
 
 router.use(authenticate);
 
