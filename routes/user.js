@@ -11,8 +11,8 @@ const {
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.put('/:id/admin', setAdmin);
-router.get('/:id', getUserDetails);
-router.put('/:id/password', updatePassword);
+router.put('/:id/set-as-admin', setAdmin);
+router.get('/:details', getUserDetails);
+router.put('/update-password', updatePassword);
 
 module.exports = router;
