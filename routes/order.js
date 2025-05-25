@@ -7,8 +7,8 @@ const {
   getAllOrders
 } = require('../controllers/order');
 
-const authenticate = require('../authenticate');
-const authorizeAdmin = require('../authorizeAdmin');
+const authenticate = require('../middleware/authenticate');
+const authorizeAdmin = require('../middleware/authorizeAdmin');
 
 router.use(authenticate);
 
