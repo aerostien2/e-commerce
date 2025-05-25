@@ -1,3 +1,6 @@
+console.log(require('path').resolve(__dirname, '../middleware/authenticate.js'));
+
+
 const express = require('express');
 const router = express.Router();
 
@@ -11,7 +14,6 @@ const {
 
 // Middleware to check if user is authenticated - you need to implement this
 const authenticate = require('../middleware/authenticate');
-
 
 router.use(authenticate);
 
