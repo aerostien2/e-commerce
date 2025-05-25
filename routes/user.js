@@ -9,10 +9,14 @@ const {
   updatePassword,
 } = require('../controllers/user');
 
+const authenticate = require('../middleware/authenticate');
+
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.put('/:id/set-as-admin', setAdmin);
-router.get('/:details', getUserDetails);
-router.put('/update-password', updatePassword);
+
+// Protected routes with PATCH
+router.get('/details', authenticate, getUserDetails);
+router.patch('/:id/set-as-admin', authenticate, setAdmin);
+router.patch('/update-password', authenticate, updatePassword);
 
 module.exports = router;

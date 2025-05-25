@@ -1,26 +1,86 @@
-const Product = require('../models/product');
+const Product = require('../models/Product');
 
-// Admin-only: Create a new product
+// Create a new product (Admin only)
 exports.createProduct = async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
+
   try {
-    // TEMPORARY ADMIN CHECK: Replace this with real auth later
-    const isAdmin = req.body.isAdmin;
+    const product = new Product(req.body);
+    const saved = await product.save();
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-    if (!isAdmin) {
-      return res.status(403).json({ message: 'Access denied. Admins only.' });
-    }
+// Retrieve all products (Admin only)
+exports.getAllProducts = async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
 
-    const { name, description, price } = req.body;
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-    const newProduct = new Product({
-      name,
-      description,
-      price
-    });
+// Retrieve all active products (Public)
+exports.getActiveProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isActive: true });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+// Retrieve a single product by ID (Public)
+exports.getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update product info (Admin only)
+exports.updateProduct = async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
+
+  try {
+    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: 'Product not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Archive product (Admin only)
+exports.archiveProduct = async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
+
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json({ message: 'Product archived successfully', product });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Activate product (Admin only)
+exports.activateProduct = async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Access denied' });
+
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json({ message: 'Product activated successfully', product });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
