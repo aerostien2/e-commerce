@@ -15,14 +15,8 @@ app.use(express.json());
 
 // [SECTION] Routes
 const userRoutes = require('./routes/user');
-const productRoutes = require('./routes/product');
-const orderRoutes = require('./routes/order');
-const cartRoutes = require('./routes/cart'); // Added cart routes
 
 app.use('/users', userRoutes);
-app.use('/products', productRoutes);
-app.use('/orders', orderRoutes);
-app.use('/cart', cartRoutes); // Mount cart routes
 
 // [SECTION] Database Setup
 mongoose.connect(process.env.MONGO_URI)

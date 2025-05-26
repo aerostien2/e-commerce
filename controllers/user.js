@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -69,11 +70,32 @@ exports.loginUser = async (req, res) => {
 
 // Set user as admin (Admin only)
 exports.setAdmin = async (req, res) => {
-  try {
-    const userId = req.params.id;
+  const userId = req.params.id;
 
+  // 1. Validate ObjectId *before* any DB call
+if (!userId || !mongoose.Types.ObjectId.isValid(userId.trim())) {
+    return res.status(400).json({
+      error: "Failed in Find",
+      details: {
+        stringValue: `"${userId}"`,
+        valueType: typeof userId,
+        kind: "ObjectId",
+        value: userId,
+        path: "_id",
+        reason: {},
+        name: "CastError",
+        message: `Cast to ObjectId failed for value "${userId}" (type ${typeof userId}) at path "_id" for model "User"`
+      }
+    });
+  }
+console.log("Valid ObjectId:", mongoose.Types.ObjectId.isValid(userId));
+
+  try {
+    // 2. Now safe to query the DB
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found.' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
 
     user.isAdmin = true;
     await user.save();
@@ -92,12 +114,15 @@ exports.setAdmin = async (req, res) => {
         updatedAt
       }
     });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    // 3. Catch unexpected errors
+    return res.status(500).json({
+      error: "Internal Server Error",
+      details: err.message
+    });
   }
 };
-
-
 
 // Retrieve user details
 exports.getUserDetails = async (req, res) => {
