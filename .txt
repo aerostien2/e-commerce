@@ -1,0 +1,45 @@
+{
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "admin@mail.com",
+    "mobileNo": "09123456789",
+    "password": "admin123"
+}
+
+{
+    "firstName": "Dummy",
+    "lastName": "Customer",
+    "email": "customer@mail.com",
+    "mobileNo": "09123456789",
+    "password": "customer123"
+}
+
+{
+  "email": "admin@mail.com",
+  "password": "admin123"
+}
+
+{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODM0NDcwMDhiZTg4OTYyMjM0MjNhNGYiLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE3NDgyNTcxMjEsImV4cCI6MTc0ODM0MzUyMX0.9kaE3w0ET0PDzw1I5_xvEyYIEWJKp91VtVLLKET39l0"
+}
+
+{
+    "_id": "683447008be8896223423a4f",
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "admin@mail.com",
+    "isAdmin": true,
+    "mobileNo": "09123456789",
+    "createdAt": "2025-05-26T10:48:32.609Z",
+    "updatedAt": "2025-05-26T10:48:32.609Z",
+    "__v": 0
+}
+
+{
+    "oldPassword" : "admin123",
+    "newPassword" : "123admin"
+}
+
+{
+    "message": "Password updated successfully"
+}
