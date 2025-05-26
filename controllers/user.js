@@ -8,6 +8,27 @@ exports.registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password, mobileNo } = req.body;
 
+
+  // Manual validation
+  if (!firstName || !lastName || !email || !password || !mobileNo) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[0-9]{10,15}$/;
+
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: 'Invalid email format.' });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+  }
+
+  if (!phoneRegex.test(mobileNo)) {
+    return res.status(400).json({ message: 'Invalid mobile number format.' });
+  }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'Email already in use.' });
 
