@@ -27,11 +27,30 @@ exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid Email' });
+    }
+
+    console.log("Email entered:", email);
+    console.log("Password entered:", password);
+
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
+    if (!user) {
+      console.log("User not found");
+      return res.status(400).json({ message: 'No Email Found' });
+    }
+
+    console.log("User found:", user.email);
+    console.log("Stored hash:", user.password);
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
+    console.log("Password match:", isMatch);
+
+    if (!isMatch) {
+      console.log("Password did not match");
+      return res.status(400).json({ message: 'Email and password do not match' });
+    }
 
     const token = jwt.sign(
       { userId: user._id, isAdmin: user.isAdmin },
@@ -39,35 +58,45 @@ exports.loginUser = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    res.status(200).json({ token, userId: user._id, isAdmin: user.isAdmin });
+    console.log("Token created:", token);
+
+    return res.status(200).json({ access: token });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Login error:", err);
+    return res.status(500).json({ error: err.message });
   }
 };
 
 // Set user as admin (Admin only)
 exports.setAdmin = async (req, res) => {
   try {
-    const adminId = req.user.userId;  // requester
-    const isAdmin = req.user.isAdmin; // check if requester is admin
+    const userId = req.params.id;
 
-    if (!isAdmin) {
-      return res.status(403).json({ message: 'Only admins can set admin rights' });
-    }
-
-    const { id } = req.params; // user to be set as admin
-
-    const user = await User.findById(id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
 
     user.isAdmin = true;
     await user.save();
 
-    res.json({ message: `User ${user.email} is now an admin.` });
+    const { _id, firstName, lastName, email, isAdmin, mobileNo, createdAt, updatedAt } = user;
+
+    res.status(200).json({
+      updatedUser: {
+        _id,
+        firstName,
+        lastName,
+        email,
+        isAdmin,
+        mobileNo,
+        createdAt,
+        updatedAt
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 
 // Retrieve user details

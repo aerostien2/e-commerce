@@ -10,8 +10,27 @@ const {
 } = require('../controllers/user');
 
 const authenticate = require('../middleware/authenticate');
+const { body, validationResult } = require('express-validator');
 
-router.post('/register', registerUser);
+// Register route with validation
+router.post(
+  '/register',
+  [
+    body('email').isEmail().withMessage('Invalid email format'),
+    body('mobileNo').isMobilePhone('any').withMessage('Invalid mobile number'),
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    // Pass to controller if validation passed
+    registerUser(req, res);
+  }
+);
+
 router.post('/login', loginUser);
 
 // Protected routes with PATCH
