@@ -131,35 +131,24 @@ exports.setAdmin = async (req, res) => {
 
 
 //Update password
-module.exports.updatePassword = function (req, res) {
+
+module.exports.updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
-  User.findById(req.user.id, function (err, user) {
-    if (err || !user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+  try {
+    const user = await User.findById(req.user.id); 
 
-    bcrypt.compare(currentPassword, user.password, function (err, isMatch) {
-      if (err) {
-        return res.status(500).json({ message: 'An error occurred' });
-      }
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Current password is incorrect' });
-      }
+    if (!user) return res.status(404).send({ message: 'User not found' });
 
-      bcrypt.hash(newPassword, 10, function (err, hash) {
-        if (err) {
-          return res.status(500).json({ message: 'An error occurred' });
-        }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).send({ message: 'Current password is incorrect' });
 
-        user.password = hash;
-        user.save(function (err) {
-          if (err) {
-            return res.status(500).json({ message: 'An error occurred' });
-          }
-          res.status(200).json({ message: 'Password reset successfully' });
-        });
-      });
-    });
-  });
+    user.password =  bcrypt.hashSync(newPassword, 10);
+
+    await user.save();
+
+    res.status(200).send({ message: 'Password reset successfully' });
+  } catch (err) {
+    errorHandler(err, req, res);
+  }
 };
