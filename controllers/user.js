@@ -131,24 +131,23 @@ exports.setAdmin = async (req, res) => {
 
 
 //Update password
-
 module.exports.updatePassword = async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
+  const { newPassword } = req.body; 
 
   try {
-    const user = await User.findById(req.user.id); 
+    const user = await User.findById(req.user.id);  
 
-    if (!user) return res.status(404).send({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: 'User not found' });  
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).send({ message: 'Current password is incorrect' });
+    user.password = await bcrypt.hash(newPassword, 10);
 
-    user.password =  bcrypt.hashSync(newPassword, 10);
+    await user.save();  // Save updated user
 
-    await user.save();
+    // Send success response
+    res.status(200).json({ message: 'Password reset successfully' });
 
-    res.status(200).send({ message: 'Password reset successfully' });
   } catch (err) {
     errorHandler(err, req, res);
   }
 };
+
