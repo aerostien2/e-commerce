@@ -58,7 +58,6 @@ module.exports.loginUser = (req, res) => {
         })
         .catch(error => errorHandler(error, req, res));
     } else{
-        // if the email used in not in the right format, send a message 'Invalid email format'.
         return res.status(400).send({ message: 'Invalid email' });
     }
 };
@@ -136,15 +135,14 @@ module.exports.updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   try {
-    const user = await User.findById(req.user.id); // assuming req.user is set by authMiddleware
+    const user = await User.findById(req.user.id); 
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
 
-   
-    user.password = await bcrypt.hashSync(newPassword, 10);
+    user.password = await bcrypt.hash(newPassword, 10);
 
     await user.save();
 
