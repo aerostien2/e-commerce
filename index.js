@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const userRoutes = require('./routes/user');
+const productRoutes = require('./routes/product');
+
 
 require('dotenv').config();
 
@@ -13,6 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/users", userRoutes);
+app.use("/products", productRoutes);
+
 
 // [SECTION] Database Setup
 mongoose.connect(process.env.MONGODB_URI);
