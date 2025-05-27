@@ -1,22 +1,18 @@
-// [SECTION] Environment Setup
-require('dotenv').config();
-
-// [SECTION] Dependencies and Modules
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-// [SECTION] Initialize app
-const app = express();
-
-// [SECTION] Middleware
-app.use(cors());
-app.use(express.json());
-
-// [SECTION] Routes
 const userRoutes = require('./routes/user');
 
-app.use('/users', userRoutes);
+require('dotenv').config();
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+
+app.use("/users", userRoutes);
 
 // [SECTION] Database Setup
 mongoose.connect(process.env.MONGO_URI)

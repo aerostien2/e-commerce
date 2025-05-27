@@ -1,126 +1,102 @@
-const mongoose = require('mongoose');
-const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const auth = require('../auth');
+const { errorHandler } = auth;
 
-// User registration
-exports.registerUser = async (req, res) => {
-  try {
-    const { firstName, lastName, email, password, mobileNo } = req.body;
+//User registration
 
-  // Manual validation
-  if (!firstName || !lastName || !email || !password || !mobileNo) {
-    return res.status(400).json({ message: 'All fields are required.' });
-  }
+module.exports.registerUser = (req, res) => {
+    if (!req.body) {
+        return res.status(400).send({ message: 'Request body is missing' });
+    }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^[0-9]{10,15}$/;
+    const { email, mobileNo, password, firstName, lastName } = req.body;
 
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: 'Invalid email format.' });
-  }
+    if (!email || !email.includes("@")) {
+        return res.status(400).send({ message: 'Invalid email format' });
+    } else if (!mobileNo || mobileNo.length !== 11) {
+        return res.status(400).send({ message: 'Mobile number is invalid' });
+    } else if (!password || password.length < 8) {
+        return res.status(400).send({ message: 'Password must be at least 8 characters long' });
+    } else {
+        const newUser = new User({
+            firstName,
+            lastName,
+            email,
+            mobileNo,
+            password: bcrypt.hashSync(password, 10)
+        });
 
-  if (password.length < 8) {
-    return res.status(400).json({ message: 'Password must be at least 8 characters.' });
-  }
-
-  if (!phoneRegex.test(mobileNo)) {
-    return res.status(400).json({ message: 'Invalid mobile number format.' });
-  }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Email already in use.' });
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new User({ firstName, lastName, email, password: hashedPassword, mobileNo });
-    await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully.' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+        return newUser.save()
+            .then((result) => res.status(201).send({
+                message: 'User registered successfully'
+            }))
+            .catch(error => errorHandler(error, req, res));
+    }
 };
 
-// User authentication
-exports.loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Invalid Email' });
+//User authentication
+module.exports.loginUser = (req, res) => {
+
+    if(req.body.email.includes("@")){
+        return User.findOne({ email : req.body.email })
+        .then(result => {
+            if(result == null){
+                return res.status(404).send({ message: 'No email found' });
+            } else {
+                const isPasswordCorrect = bcrypt.compareSync(req.body.password, result.password);
+                if (isPasswordCorrect) {
+                    return res.status(200).send({ 
+                        message: 'User logged in successfully',
+                        access : auth.createAccessToken(result)
+                        })
+                } else {
+                    return res.status(401).send({ message: 'Email and password do not match' });
+                }
+            }
+        })
+        .catch(error => errorHandler(error, req, res));
+    } else{
+        // if the email used in not in the right format, send a message 'Invalid email format'.
+        return res.status(400).send({ message: 'Invalid email' });
     }
-
-    console.log("Email entered:", email);
-    console.log("Password entered:", password);
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log("User not found");
-      return res.status(400).json({ message: 'No Email Found' });
-    }
-
-    console.log("User found:", user.email);
-    console.log("Stored hash:", user.password);
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password match:", isMatch);
-
-    if (!isMatch) {
-      console.log("Password did not match");
-      return res.status(400).json({ message: 'Email and password do not match' });
-    }
-
-    const token = jwt.sign(
-      { userId: user._id, isAdmin: user.isAdmin },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    console.log("Token created:", token);
-
-    return res.status(200).json({ access: token });
-  } catch (err) {
-    console.error("Login error:", err);
-    return res.status(500).json({ error: err.message });
-  }
 };
 
-// Set user as admin (Admin only)
+
+//Retrieve user details
+
+module.exports.getProfile = (req, res) => {
+    return User.findById(req.user.id)
+        .then(user => {
+            if (!user) {
+                return res.status(404).send({ message: 'User not found' });
+            }
+
+            // Convert to plain object and remove password
+            const userData = user.toObject();
+            delete userData.password;
+
+            return res.status(200).send({ user: userData });
+        })
+        .catch(error => errorHandler(error, req, res));
+};
+
+ 
+
+//Set as admin
+
 exports.setAdmin = async (req, res) => {
-  const userId = req.params.id;
-
-  // 1. Validate ObjectId *before* any DB call
-if (!userId || !mongoose.Types.ObjectId.isValid(userId.trim())) {
-    return res.status(400).json({
-      error: "Failed in Find",
-      details: {
-        stringValue: `"${userId}"`,
-        valueType: typeof userId,
-        kind: "ObjectId",
-        value: userId,
-        path: "_id",
-        reason: {},
-        name: "CastError",
-        message: `Cast to ObjectId failed for value "${userId}" (type ${typeof userId}) at path "_id" for model "User"`
-      }
-    });
-  }
-console.log("Valid ObjectId:", mongoose.Types.ObjectId.isValid(userId));
-
   try {
-    // 2. Now safe to query the DB
+    const userId = req.params.id;
+
     const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found.' });
 
     user.isAdmin = true;
     await user.save();
 
-    const { _id, firstName, lastName, email, isAdmin, mobileNo, createdAt, updatedAt } = user;
+    const { _id, firstName, lastName, email, isAdmin, mobileNo} = user;
 
     res.status(200).json({
       updatedUser: {
@@ -129,58 +105,51 @@ console.log("Valid ObjectId:", mongoose.Types.ObjectId.isValid(userId));
         lastName,
         email,
         isAdmin,
-        mobileNo,
-        createdAt,
-        updatedAt
+        mobileNo  
       }
     });
-
   } catch (err) {
-    // 3. Catch unexpected errors
-    return res.status(500).json({
-      error: "Internal Server Error",
-      details: err.message
-    });
-  }
-};
+    if (err.name === 'CastError') {
+      return res.status(500).json({
+        error: 'Failed in Find',
+        details: {
+          stringValue: err.stringValue,
+          valueType: typeof err.value,
+          kind: err.kind,
+          value: err.value,
+          path: err.path,
+          reason: err.reason,
+          name: err.name,
+          message: err.message
+        }
+      });
+    }
 
-// Retrieve user details
-exports.getUserDetails = async (req, res) => {
-  try {
-    // Use authenticated user's id instead of param
-    const user = await User.findById(req.user.userId).select('-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    res.json(user);
-  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Update password
-exports.updatePassword = async (req, res) => {
+
+
+//Update password
+module.exports.updatePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
   try {
-    // Use authenticated user's id instead of param
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user.id); // assuming req.user is set by authMiddleware
+
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const { oldPassword, newPassword } = req.body;
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
 
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: 'Old and new passwords are required' });
-    }
+   
+    user.password = await bcrypt.hashSync(newPassword, 10);
 
-    const validOldPassword = await bcrypt.compare(oldPassword, user.password);
-    if (!validOldPassword) {
-      return res.status(401).json({ message: 'Old password is incorrect' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
-    res.json({ message: 'Password updated successfully' });
+    res.status(200).json({ message: 'Password reset successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    errorHandler(err, req, res);
   }
 };

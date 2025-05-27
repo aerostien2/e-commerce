@@ -1,24 +1,26 @@
 const express = require('express');
+const userController = require('../controllers/user');
+
+const { verify , verifyAdmin } = require("../auth");
+
 const router = express.Router();
 
-const {
-  registerUser,
-  loginUser,
-  setAdmin,
-  getUserDetails,
-  updatePassword,
-} = require('../controllers/user');
 
-const authenticate = require('../middleware/authenticate');
+// Route for User Registration
+router.post("/register", userController.registerUser);
 
-// Register route (validation will be done in the controller)
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+// Route for User Login
+router.post("/login", userController.loginUser);
 
-// Protected routes with PATCH
-router.get('/details', authenticate, getUserDetails);
-router.patch('/:id/set-as-admin', authenticate, setAdmin);
-router.patch('/update-password', authenticate, updatePassword);
+// Route for retrieving user details
+router.get("/details", verify, userController.getProfile);
+
+//Update user as admin
+router.patch('/:id/set-as-admin', verify, verifyAdmin, userController.setAdmin);
+
+//Update password
+router.patch('/update-password', verify, userController.updatePassword);
 
 module.exports = router;
+
 
