@@ -15,12 +15,14 @@ app.use(cors());
 app.use("/users", userRoutes);
 
 // [SECTION] Database Setup
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(process.env.MONGODB_URI)
+
+mongoose.connection.once('open', () => console.log('Now connected to MongoDB Atlas.'))
 
 // [SECTION] Server Gateway Response
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
+if(require.main === module) {
+    app.listen( process.env.PORT || 4000, () => {
+        console.log(`API is now online on port ${ process.env.PORT || 4000 }`);
+    })
+}
 module.exports = { app, mongoose };

@@ -1,7 +1,7 @@
 const express = require('express');
 const userController = require('../controllers/user');
 
-const { verify , verifyAdmin } = require("../auth");
+const { verify } = require("../auth");
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.post("/login", userController.loginUser);
 router.get("/details", verify, userController.getProfile);
 
 //Update user as admin
-router.patch('/:id/set-as-admin', verify, verifyAdmin, userController.setAdmin);
+router.patch('/:id/set-as-admin', verify, userController.setAdmin);
 
 //Update password
 router.patch('/update-password', verify, userController.updatePassword);
