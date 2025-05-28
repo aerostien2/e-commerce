@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const userRoutes = require('./routes/user');
 const productRoutes = require('./routes/product');
+const cartRoutes = require('./routes/cart');
 
 
 require('dotenv').config();
@@ -16,6 +17,7 @@ app.use(cors());
 
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
+app.use("/cart", cartRoutes);
 
 
 // [SECTION] Database Setup
