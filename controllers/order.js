@@ -41,12 +41,10 @@ exports.myOrders = async (req, res) => {
 module.exports.allOrders = (req, res) => {
   return Order.find()
     .then(orders => {
-      if (orders.length === 0) {
-        return res.status(404).send({ message: "No orders found" });
-      }
       return res.status(200).send({ orders: orders });
     })
     .catch(error => {
+      console.error(error);
       return res.status(500).json({ error: error.message });
     });
 };
