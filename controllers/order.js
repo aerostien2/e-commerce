@@ -27,7 +27,7 @@ module.exports.myOrders = async (req, res) => {
   try {
 
   	const userId = req.user.id;
-    const orders = await Order.findOne({ userId: userId });
+    const orders = await Order.find({ userId: userId });
 
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found for this user' });
@@ -46,7 +46,7 @@ module.exports.allOrders = async(req, res) => {
 	try{
 
 	   const orders = await Order.find();
-	   res.status(200).json({ orders: orders });
+	   return res.status(200).json({ orders: orders });
 
 	} catch (err) {
     	errorHandler(err, req, res);
