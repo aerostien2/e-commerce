@@ -38,10 +38,9 @@ exports.myOrders = async (req, res) => {
 
 
 //Retrieve all orders
-module.exports.allOrders = (req, res) => {
-  return Order.find()
-    .then(orders => {
-      return res.status(200).send({ orders: orders });
-    })
-    .catch(err => res.status(500).send(err));
-};
+module.exports.allOrders = async (req, res) => {
+
+  const orders = await Order.find();
+
+  res.status(200).send({orders: orders});
+ };
