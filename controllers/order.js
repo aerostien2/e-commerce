@@ -40,13 +40,13 @@ exports.myOrders = async (req, res) => {
 //Retrieve all orders
 module.exports.allOrders = (req, res) => {
   return Order.find()
-  .then(order => {
-        if(order){
-            return res.status(200).send({orders: order});
-        }
-        else{
-            return res.status(404).send({message : "No orders found"});
-        }
+    .then(orders => {
+      if (orders.length === 0) {
+        return res.status(404).send({ message: "No orders found" });
+      }
+      return res.status(200).send({ orders: orders });
     })
-    .catch(error => errorHandler(error, req, res));
+    .catch(error => {
+      return res.status(500).json({ error: error.message });
+    });
 };
