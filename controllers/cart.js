@@ -104,3 +104,67 @@ module.exports.changeCart = async (req, res) => {
     errorHandler(err, req, res);
   }
 };
+
+// Remove item from cart controller
+module.exports.removeItem = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { productId } = req.params;
+
+    // Find the user's cart
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    const itemIndex = cart.cartItems.findIndex(item => item.productId.toString() === productId);
+    if (itemIndex === -1) {
+      // Item not in cart
+      return res.status(404).json({ message: "Item not found in cart" });
+    }
+
+    cart.cartItems.splice(itemIndex, 1);
+    cart.totalPrice = cart.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+
+    // Save the updated cart
+    await cart.save();
+
+    res.json({
+      message: 'Item removed from cart successfully',
+      updatedCart: cart
+       
+    });
+  } catch (err) {
+    errorHandler(err, req, res);
+  }
+};
+
+
+//Clear Cart
+
+module.exports.clearCart = async (req, res) => {
+  try {
+    const user = req.user; 
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const cart = await Cart.findOne({ userId: user.id });
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found for user' });
+    }
+
+    cart.cartItems = [];
+    cart.totalPrice = 0;
+
+    await cart.save();
+
+    res.json({
+      message: 'Cart cleared successfully',
+      cart: cart
+    });
+  } catch (err) {
+    errorHandler(err, req, res);
+  }
+};;

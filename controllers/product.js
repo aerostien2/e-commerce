@@ -158,3 +158,58 @@ module.exports.activateProduct = (req, res) => {
         })
         .catch(error => errorHandler(error, req, res));
 };
+
+//Search products by their names
+
+module.exports.searchByName = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const product = req.product;
+    if (!name) {
+      return res.status(400).json({ message: "Product name query parameter is required" });
+    }
+
+    const products = await Product.find({ name: { $regex: name, $options: 'i' } });
+
+    return res.status(200).json(
+      products.map(product => ({
+        _id: product._id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        isActive: product.isActive,
+        createdOn: product.createdOn,
+        __v: product.__v
+      }))
+    );
+  } catch (err) {
+    errorHandler(err, req, res);
+  }
+};
+
+//Search product by their price range
+
+module.exports.searchByPrice = async (req, res) => {
+  try {
+    const min = Number(req.query.min) || 0;
+    const max = Number(req.query.max) || Number.MAX_SAFE_INTEGER;
+
+    const products = await Product.find({
+      price: { $gte: min, $lte: max }
+    });
+
+    return res.status(200).json(
+      products.map(product => ({
+        _id: product._id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        isActive: product.isActive,
+        createdOn: product.createdOn,
+        __v: product.__v
+      }))
+    );
+  } catch (err) {
+    errorHandler(err, req, res);
+  }
+};
