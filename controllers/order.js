@@ -43,8 +43,5 @@ module.exports.allOrders = (req, res) => {
     .then(orders => {
       return res.status(200).send({ orders: orders });
     })
-    .catch(error => {
-      console.error(error);
-      return res.status(500).json({ error: error.message });
-    });
+    .catch(err => res.status(500).send(err));
 };
