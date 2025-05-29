@@ -42,9 +42,9 @@ exports.allOrders = async(req, res) => {
 	try{
 
 	   const orders = await Order.find();
-	   res.status(200).json({ orders: orders });
+	   return res.status(200).json({ orders: orders });
 
 	} catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
+    	errorHandler(err, req, res);
+  	}
 };
