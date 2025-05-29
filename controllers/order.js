@@ -45,6 +45,6 @@ exports.allOrders = async(req, res) => {
 	   return res.status(200).json({ orders: orders });
 
 	} catch (err) {
-    	errorHandler(err, req, res);
-  	}
+    return res.status(500).json({ error: err.message });
+  }
 };
