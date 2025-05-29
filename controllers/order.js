@@ -23,7 +23,7 @@ exports.createOrder = async (req, res) => {
 
 
 //Retrieve logged in user's order
-module.exports.myOrders = async (req, res) => {
+exports.myOrders = async (req, res) => {
   try {
 
   	const userId = req.user.id;
@@ -42,7 +42,7 @@ module.exports.myOrders = async (req, res) => {
 
 
 //Retrieve all orders
-module.exports.allOrders = async(req, res) => {
+exports.allOrders = async(req, res) => {
 	try{
 
 	   const orders = await Order.find();
