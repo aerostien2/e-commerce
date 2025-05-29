@@ -39,10 +39,10 @@ exports.myOrders = async (req, res) => {
 
 //Retrieve all orders
 module.exports.allOrders = (req, res) => {
-  return Order.find({})
+  return Order.find()
   .then(result => {
         if(result.length > 0){
-            return res.status(200).send(result);
+            return res.status(200).send({orders: result});
         }
         else{
             // 404 for not found courses
