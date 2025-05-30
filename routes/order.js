@@ -12,6 +12,7 @@ router.post('/checkout', verify, orderController.createOrder);
 //Retrieve logged in user's orders
 router.get('/my-orders', verify, orderController.myOrders);
 
-
+//Retrieve all user's orders
+router.get('/all-orders', verifyAdmin, orderController.allOrders);
 
 module.exports = router;
