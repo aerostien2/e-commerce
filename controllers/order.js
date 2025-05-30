@@ -39,7 +39,7 @@ exports.myOrders = async (req, res) => {
 
 //Retrieve all orders
 
-module.exports.allOrders = (req, res) => {
+module.exports.getAllOrders = (req, res) => {
   return Order.find()
   .then (result => {
     if(result.length > 0){
@@ -48,5 +48,6 @@ module.exports.allOrders = (req, res) => {
     else{
       return res.status(404).send({message: "No Orders Found"});
     }
-  }).catch(err => res.status(500).send(err));
+  })
+  .catch(error => errorHandler(error, req, res));
 };
