@@ -13,11 +13,11 @@ module.exports.registerUser = (req, res) => {
     const { email, mobileNo, password, firstName, lastName } = req.body;
 
     if (!email || !email.includes("@")) {
-        return res.status(400).send({ message: 'Invalid email format' });
+        return res.status(400).send({ message: 'Email invalid' });
     } else if (!mobileNo || mobileNo.length !== 11) {
-        return res.status(400).send({ message: 'Mobile number is invalid' });
+        return res.status(400).send({ message: 'Mobile number invalid' });
     } else if (!password || password.length < 8) {
-        return res.status(400).send({ message: 'Password must be at least 8 characters long' });
+        return res.status(400).send({ message: 'Password must be at least 8 characters' });
     } else {
         const newUser = new User({
             firstName,
@@ -29,7 +29,7 @@ module.exports.registerUser = (req, res) => {
 
         return newUser.save()
             .then((result) => res.status(201).send({
-                message: 'User registered successfully'
+                message: 'Registered successfully'
             }))
             .catch(error => errorHandler(error, req, res));
     }
@@ -48,7 +48,6 @@ module.exports.loginUser = (req, res) => {
                 const isPasswordCorrect = bcrypt.compareSync(req.body.password, result.password);
                 if (isPasswordCorrect) {
                     return res.status(200).send({ 
-                        message: 'User logged in successfully',
                         access : auth.createAccessToken(result)
                         })
                 } else {
@@ -58,7 +57,7 @@ module.exports.loginUser = (req, res) => {
         })
         .catch(error => errorHandler(error, req, res));
     } else{
-        return res.status(400).send({ message: 'Invalid email' });
+        return res.status(400).send({ message: 'Invalid Email' });
     }
 };
 
@@ -95,7 +94,7 @@ exports.setAdmin = async (req, res) => {
     user.isAdmin = true;
     await user.save();
 
-    const { _id, firstName, lastName, email, isAdmin, mobileNo} = user;
+    const { _id, firstName, lastName, email, password, isAdmin, mobileNo} = user;
 
     res.status(200).json({
       updatedUser: {
@@ -103,6 +102,7 @@ exports.setAdmin = async (req, res) => {
         firstName,
         lastName,
         email,
+        password,
         isAdmin,
         mobileNo  
       }
