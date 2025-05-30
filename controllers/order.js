@@ -37,15 +37,3 @@ exports.myOrders = async (req, res) => {
 };
 
 
-//Retrieve all orders
-module.exports.allOrders = async (req, res) => {
- try{
-
-  const order = await Order.find();
-
-  res.status(200).json({orders: order});
-
- } catch(err){
-  errorHandler(err, req, res);
- }
-};
