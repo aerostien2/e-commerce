@@ -4,7 +4,7 @@ const cartController = require('../controllers/cart');
 
 const auth = require("../auth");
 
-const { verify, verifyAdmin } = require("../auth");
+const { verify } = require("../auth");
 
 //Retrieve user's cart
 router.get('/get-cart', verify, cartController.getCart);
