@@ -28,12 +28,10 @@ module.exports.createProduct = (req, res) => {
 module.exports.getAllProducts = (req, res) => {
   return Product.find({})
   .then(result => {
-        // if the result is not null send status 30 and its result
         if(result.length > 0){
             return res.status(200).send(result);
         }
         else{
-            // 404 for not found courses
             return res.status(404).send({message : "No products found"});
         }
     })
@@ -45,14 +43,10 @@ module.exports.getAllProducts = (req, res) => {
 module.exports.getAllActive = (req, res) => {
 
     Product.find({ isActive : true }).then(result => {
-        // if the result is not null
         if (result.length > 0){
-            // send the result as a response
             return res.status(200).send(result);
         }
-        // if there are no results found
         else {
-            // send the message as the response
             return res.status(404).send({message: 'No active products found'})
         }
     }).catch(err => res.status(500).send(err));
