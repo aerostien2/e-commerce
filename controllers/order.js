@@ -38,16 +38,14 @@ exports.myOrders = async (req, res) => {
 
 
 //Retrieve all orders
+module.exports.getAllOrders = async (req, res) => {
+ try{
 
-module.exports.getAllOrders = (req, res) => {
-  return Order.find()
-  .then (result => {
-    if(result.length > 0){
-      return res.status(200).send(result);
-    }
-    else{
-      return res.status(404).send({message: "No Orders Found"});
-    }
-  })
-  .catch(error => errorHandler(error, req, res));
+  const orders = await Order.find();
+
+  res.status(200).json({orders: orders});
+
+ } catch(err){
+  errorHandler(err, req, res);
+ }
 };
