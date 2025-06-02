@@ -1,4 +1,4 @@
-Regular
+Regular: 
  Email: jamesDoe@mail.com
  Password: sample123
 

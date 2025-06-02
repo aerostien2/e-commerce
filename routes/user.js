@@ -16,10 +16,10 @@ router.post("/login", userController.loginUser);
 router.get("/details", verify, userController.getProfile);
 
 //Update user as admin
-router.patch('/:id/set-as-admin', verify, verifyAdmin, userController.setAdmin);
+router.patch("/:id/set-as-admin", verify, verifyAdmin, userController.setAdmin);
 
 //Update password
-router.patch('/update-password', verify, userController.updatePassword);
+router.patch("/update-password", verify, userController.updatePassword);
 
 module.exports = router;
 
