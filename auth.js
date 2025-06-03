@@ -27,7 +27,7 @@ module.exports.verify = (req, res, next) => {
     } else {
         console.log(token);
         //Bearer Token ejdlaskfndlskfjlksd
-        token = token.slice(7, token.lenght);
+        token = token.slice(7, token.length);
         console.log(token);
 
 
